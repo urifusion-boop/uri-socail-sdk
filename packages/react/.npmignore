@@ -1,0 +1,23 @@
+# Source files
+src/
+tsconfig.json
+tsup.config.ts
+
+# Tests
+**/*.test.tsx
+**/*.spec.tsx
+**/*.stories.tsx
+__tests__/
+
+# Development
+.DS_Store
+*.log
+node_modules/
+
+# Documentation
+*.md
+!README.md
+
+# Config files
+.eslintrc*
+.prettierrc*

@@ -1,0 +1,55 @@
+{
+  "name": "@urisocial/react",
+  "version": "1.0.0",
+  "description": "React components for URI Social SDK - AI-powered social media content generation",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "urisocial",
+    "react",
+    "social-media",
+    "content-generation",
+    "ai",
+    "components",
+    "hooks"
+  ],
+  "author": "URI Social <support@urisocial.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@urisocial/sdk": "^1.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@urisocial/sdk": "^1.0.0",
+    "eslint": "^8.56.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uri-social/urisocial-sdk",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/uri-social/urisocial-sdk/tree/main/packages/react#readme",
+  "bugs": {
+    "url": "https://github.com/uri-social/urisocial-sdk/issues"
+  }
+}

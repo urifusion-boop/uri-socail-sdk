@@ -1,0 +1,40 @@
+{
+  "name": "urisocial-sdk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "URI Social SDK - Enable social media content generation in any platform",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:ts": "npm run build --workspace=packages/typescript-sdk",
+    "build:react": "npm run build --workspace=packages/react",
+    "dev": "npm run dev --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "install:examples": "cd examples/react-example && npm install",
+    "example:react": "cd examples/react-example && npm run dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uri-social/urisocial-sdk"
+  },
+  "keywords": [
+    "urisocial",
+    "social-media",
+    "content-generation",
+    "ai",
+    "sdk"
+  ],
+  "author": "URI Social",
+  "license": "MIT"
+}
