@@ -86,12 +86,12 @@ export function CreditBadge({
   const { credits_remaining, subscription_tier } = billingInfo;
   const isLowCredits = credits_remaining < 100;
 
-  const tierDisplay = {
+  const tierDisplay = subscription_tier ? ({
     free: 'Free',
     starter: 'Starter',
     professional: 'Professional',
     enterprise: 'Enterprise',
-  }[subscription_tier] || subscription_tier;
+  }[subscription_tier] || subscription_tier) : '';
 
   return (
     <div

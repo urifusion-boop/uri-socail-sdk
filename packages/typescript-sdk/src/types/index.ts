@@ -2,6 +2,8 @@
  * URI Social SDK Types
  */
 
+import { RetryConfig } from '../client/retry';
+
 export interface URISocialConfig {
   apiKey: string;
   baseUrl?: string;
@@ -12,6 +14,11 @@ export interface URISocialConfig {
    * @since 2.0.0 - Multi-tenant support
    */
   workspaceId?: string;
+  /**
+   * Retry configuration for failed requests
+   * @default { maxRetries: 3, retryDelay: 1000, retryableStatusCodes: [408, 429, 500, 502, 503, 504], retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN'] }
+   */
+  retryConfig?: Partial<RetryConfig>;
 }
 
 export type Platform = 'instagram' | 'facebook' | 'twitter' | 'linkedin' | 'tiktok';
@@ -44,6 +51,21 @@ export interface GeneratedContent {
   created_at: string;
   status: 'pending' | 'completed' | 'failed';
   workspace_id?: string;
+}
+
+/**
+ * API response wrapper for content generation
+ * @since 2.0.0
+ */
+export interface ContentGenerationResponse {
+  status: boolean;
+  responseCode: number | string;
+  responseMessage: string;
+  responseData: {
+    request_id: string;
+    drafts: Draft[];
+    platforms_generated: Platform[];
+  };
 }
 
 export interface Draft {
@@ -101,10 +123,25 @@ export interface PublishResult {
   error?: string;
 }
 
+/**
+ * @deprecated Use UsageInfo from BillingResource instead
+ */
 export interface BillingInfo {
   credits_remaining: number;
-  subscription_tier: 'free' | 'starter' | 'professional' | 'enterprise';
-  billing_cycle_end: string;
+  subscription_tier?: 'free' | 'starter' | 'professional' | 'enterprise';
+  billing_cycle_end?: string;
+}
+
+/**
+ * Usage information for API consumption
+ * @since 2.0.0
+ */
+export interface UsageInfo {
+  credits_remaining: number;
+  subscription_tier?: 'free' | 'starter' | 'professional' | 'enterprise';
+  billing_cycle_end?: string;
+  total_api_calls?: number;
+  api_calls_this_month?: number;
 }
 
 export interface APIError {

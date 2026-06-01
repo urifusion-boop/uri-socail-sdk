@@ -1,7 +1,7 @@
 {
   "name": "@urisocial/sdk",
-  "version": "1.0.0",
-  "description": "Official TypeScript/JavaScript SDK for URI Social API",
+  "version": "2.0.1",
+  "description": "Official TypeScript/JavaScript SDK for URI Social API - Enterprise-grade social media content generation and management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -24,7 +24,17 @@
     "content-generation",
     "ai",
     "sdk",
-    "typescript"
+    "typescript",
+    "instagram",
+    "facebook",
+    "twitter",
+    "linkedin",
+    "tiktok",
+    "social-media-automation",
+    "content-marketing",
+    "multi-tenant",
+    "analytics",
+    "brand-management"
   ],
   "author": "URI Social <support@urisocial.com>",
   "license": "MIT",
@@ -44,11 +54,14 @@
     "url": "https://github.com/uri-social/urisocial-sdk",
     "directory": "packages/typescript-sdk"
   },
-  "homepage": "https://github.com/uri-social/urisocial-sdk/tree/main/packages/typescript-sdk#readme",
+  "homepage": "https://urisocial.com/docs/sdk",
   "bugs": {
     "url": "https://github.com/uri-social/urisocial-sdk/issues"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

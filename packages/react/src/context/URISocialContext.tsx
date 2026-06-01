@@ -13,6 +13,7 @@ export interface URISocialProviderProps {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;
+  workspaceId?: string;
   children: ReactNode;
 }
 
@@ -26,7 +27,7 @@ export interface URISocialProviderProps {
  *
  * function App() {
  *   return (
- *     <URISocialProvider apiKey="your-api-key">
+ *     <URISocialProvider apiKey="your-api-key" workspaceId="workspace-id">
  *       <YourComponents />
  *     </URISocialProvider>
  *   );
@@ -37,6 +38,7 @@ export function URISocialProvider({
   apiKey,
   baseUrl,
   timeout,
+  workspaceId,
   children,
 }: URISocialProviderProps) {
   const client = useMemo(() => {
@@ -44,9 +46,10 @@ export function URISocialProvider({
       apiKey,
       baseUrl,
       timeout,
+      workspaceId,
     };
     return new URISocial(config);
-  }, [apiKey, baseUrl, timeout]);
+  }, [apiKey, baseUrl, timeout, workspaceId]);
 
   const value = useMemo(
     () => ({

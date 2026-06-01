@@ -22,8 +22,22 @@ class AuthenticationError(URISocialError):
     pass
 
 
+class AuthorizationError(URISocialError):
+    """Raised when user lacks required permissions"""
+
+    pass
+
+
 class RateLimitError(URISocialError):
     """Raised when API rate limit is exceeded"""
+
+    def __init__(self, message: str, status: int = 0, response: dict = None, retry_after: int = None):
+        super().__init__(message, status, response)
+        self.retry_after = retry_after
+
+
+class NetworkError(URISocialError):
+    """Raised when network request fails"""
 
     pass
 

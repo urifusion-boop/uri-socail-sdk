@@ -47,7 +47,7 @@ class BillingResource:
             ...     start_date='2024-01-01',
             ...     end_date='2024-01-31'
             ... )
-            >>> print(f"Total credits used: {usage['total_credits_used']}")
+            >>> print(f"Total API calls: {usage['total_api_calls']}")
         """
         params = {}
         if start_date:
@@ -58,23 +58,4 @@ class BillingResource:
         return self._http.get(
             "/api/v1/billing/usage",
             params=params if params else None,
-        )
-
-    def purchase_credits(self, amount: int) -> dict:
-        """
-        Purchase additional credits
-
-        Args:
-            amount: Number of credits to purchase
-
-        Returns:
-            Checkout URL and credits amount
-
-        Example:
-            >>> checkout = client.billing.purchase_credits(100)
-            >>> print(checkout['checkout_url'])  # Redirect user here
-        """
-        return self._http.post(
-            "/api/v1/billing/purchase-credits",
-            json={"amount": amount},
         )

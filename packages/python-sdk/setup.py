@@ -5,17 +5,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="urisocial",
-    version="1.0.0",
+    version="2.0.0",
     author="URI Social",
     author_email="support@urisocial.com",
-    description="Official Python SDK for URI Social API - AI-powered social media content generation",
+    description="Official Python SDK for URI Social API - Enterprise-grade social media content generation and management",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/uri-social/urisocial-sdk",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: MIT License",
@@ -40,5 +40,5 @@ setup(
             "flake8>=6.1.0",
         ],
     },
-    keywords="urisocial social-media ai content-generation sdk",
+    keywords="urisocial social-media ai content-generation sdk instagram facebook twitter linkedin tiktok analytics video blog automation multi-tenant brand-management",
 )

@@ -36,7 +36,7 @@ export type {
 export type {
   Platform,
   ContentGenerationRequest,
-  GeneratedContent,
+  ContentGenerationResponse,
   PlatformContent,
   Draft,
   ImageGenerationRequest,

@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useURISocial } from '../context/URISocialContext';
-import type { ContentGenerationRequest, GeneratedContent } from '@urisocial/sdk';
+import type { ContentGenerationRequest, ContentGenerationResponse } from '@urisocial/sdk';
 
 interface UseContentGenerationResult {
-  content: GeneratedContent | null;
+  content: ContentGenerationResponse | null;
   isGenerating: boolean;
   error: Error | null;
   generate: (request: ContentGenerationRequest) => Promise<void>;
@@ -39,7 +39,7 @@ interface UseContentGenerationResult {
  */
 export function useContentGeneration(): UseContentGenerationResult {
   const { client } = useURISocial();
-  const [content, setContent] = useState<GeneratedContent | null>(null);
+  const [content, setContent] = useState<ContentGenerationResponse | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

@@ -7,9 +7,18 @@ import { PublishingResource } from './resources/publishing';
 import { BillingResource } from './resources/billing';
 import { WorkspacesResource } from './resources/workspaces';
 import { ClientsResource } from './resources/clients';
+import { BrandProfileResource } from './resources/brand-profile';
+import { AnalyticsResource } from './resources/analytics';
+import { CalendarResource } from './resources/calendar';
+import { VideoResource } from './resources/video';
+import { BlogResource } from './resources/blog';
+import { AutoGenerateResource } from './resources/auto-generate';
+import { UtilsResource } from './resources/utils';
 import { URISocialConfig } from './types';
 
 export * from './types';
+export * from './types/errors';
+export type { UsageInfo, UsageHistory } from './resources/billing';
 
 /**
  * URI Social SDK Client
@@ -41,12 +50,30 @@ export * from './types';
 export class URISocial {
   private http: HTTPClient;
 
+  // Core resources
   public readonly content: ContentResource;
   public readonly drafts: DraftsResource;
   public readonly images: ImagesResource;
   public readonly connections: ConnectionsResource;
   public readonly publishing: PublishingResource;
   public readonly billing: BillingResource;
+
+  // Brand & Profile
+  public readonly brandProfile: BrandProfileResource;
+
+  // Analytics & Insights
+  public readonly analytics: AnalyticsResource;
+
+  // Content Planning
+  public readonly calendar: CalendarResource;
+
+  // Advanced Content Generation
+  public readonly video: VideoResource;
+  public readonly blog: BlogResource;
+  public readonly autoGenerate: AutoGenerateResource;
+
+  // Utilities
+  public readonly utils: UtilsResource;
 
   /**
    * Workspaces resource - Multi-tenant workspace management
@@ -67,13 +94,30 @@ export class URISocial {
 
     this.http = new HTTPClient(config);
 
-    // Initialize resource modules
+    // Initialize core resource modules
     this.content = new ContentResource(this.http);
     this.drafts = new DraftsResource(this.http);
     this.images = new ImagesResource(this.http);
     this.connections = new ConnectionsResource(this.http);
     this.publishing = new PublishingResource(this.http);
     this.billing = new BillingResource(this.http);
+
+    // Initialize brand & profile resources
+    this.brandProfile = new BrandProfileResource(this.http);
+
+    // Initialize analytics resources
+    this.analytics = new AnalyticsResource(this.http);
+
+    // Initialize content planning resources
+    this.calendar = new CalendarResource(this.http);
+
+    // Initialize advanced content generation resources
+    this.video = new VideoResource(this.http);
+    this.blog = new BlogResource(this.http);
+    this.autoGenerate = new AutoGenerateResource(this.http);
+
+    // Initialize utilities
+    this.utils = new UtilsResource(this.http);
 
     // Initialize multi-tenant resources (v2.0.0)
     this.workspaces = new WorkspacesResource(this.http);

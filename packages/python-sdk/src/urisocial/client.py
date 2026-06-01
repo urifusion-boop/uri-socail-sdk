@@ -9,6 +9,15 @@ from .resources import (
     ConnectionsResource,
     PublishingResource,
     BillingResource,
+    VideoResource,
+    BlogResource,
+    AutoGenerateResource,
+    BrandProfileResource,
+    AnalyticsResource,
+    CalendarResource,
+    WorkspacesResource,
+    ClientsResource,
+    UtilsResource,
 )
 
 
@@ -50,13 +59,16 @@ class URISocial:
         api_key: str,
         base_url: str = "https://api.urisocial.com",
         timeout: int = 60,
+        workspace_id: Optional[str] = None,
     ):
         if not api_key:
             raise ValueError(
                 "API key is required. Get yours at https://urisocial.com/dashboard/api-keys"
             )
 
-        self._http = HTTPClient(api_key=api_key, base_url=base_url, timeout=timeout)
+        self._http = HTTPClient(
+            api_key=api_key, base_url=base_url, timeout=timeout, workspace_id=workspace_id
+        )
 
         # Initialize resource modules
         self.content = ContentResource(self._http)
@@ -65,6 +77,15 @@ class URISocial:
         self.connections = ConnectionsResource(self._http)
         self.publishing = PublishingResource(self._http)
         self.billing = BillingResource(self._http)
+        self.video = VideoResource(self._http)
+        self.blog = BlogResource(self._http)
+        self.auto_generate = AutoGenerateResource(self._http)
+        self.brand_profile = BrandProfileResource(self._http)
+        self.analytics = AnalyticsResource(self._http)
+        self.calendar = CalendarResource(self._http)
+        self.workspaces = WorkspacesResource(self._http)
+        self.clients = ClientsResource(self._http)
+        self.utils = UtilsResource(self._http)
 
     def set_api_key(self, api_key: str) -> None:
         """
