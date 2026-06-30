@@ -18,6 +18,9 @@ from .resources import (
     WorkspacesResource,
     ClientsResource,
     UtilsResource,
+    AgencyResource,
+    CustomGuidesResource,
+    CanvasEditorResource,
 )
 
 
@@ -31,8 +34,10 @@ class URISocial:
         api_key: Your URI Social API key
         base_url: API base URL (default: https://api.urisocial.com)
         timeout: Request timeout in seconds (default: 60)
+        workspace_id: Optional workspace ID for multi-workspace setups
+        end_user_id: Optional end-user ID for multi-tenant applications
 
-    Example:
+    Example (Direct Use):
         >>> from urisocial import URISocial
         >>>
         >>> client = URISocial(api_key='your-api-key')
@@ -43,15 +48,16 @@ class URISocial:
         ...     platforms=['instagram', 'facebook'],
         ...     reference_image='https://example.com/product.jpg'
         ... )
-        >>>
-        >>> # Get drafts
-        >>> drafts = client.drafts.list()
-        >>>
-        >>> # Publish content
-        >>> result = client.publishing.publish(
-        ...     draft_id='draft-123',
-        ...     platforms=['instagram']
+
+    Example (Multi-Tenant):
+        >>> # For SaaS platforms with multiple end-users
+        >>> client = URISocial(
+        ...     api_key='your-api-key',
+        ...     end_user_id='user-123'  # Your user's ID from your system
         ... )
+        >>>
+        >>> # Each end-user gets isolated brand profiles
+        >>> client.brand_profile.update(brand_name='User's Brand')
     """
 
     def __init__(
@@ -60,6 +66,7 @@ class URISocial:
         base_url: str = "https://api.urisocial.com",
         timeout: int = 60,
         workspace_id: Optional[str] = None,
+        end_user_id: Optional[str] = None,
     ):
         if not api_key:
             raise ValueError(
@@ -67,7 +74,11 @@ class URISocial:
             )
 
         self._http = HTTPClient(
-            api_key=api_key, base_url=base_url, timeout=timeout, workspace_id=workspace_id
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            workspace_id=workspace_id,
+            end_user_id=end_user_id,
         )
 
         # Initialize resource modules
@@ -86,6 +97,9 @@ class URISocial:
         self.workspaces = WorkspacesResource(self._http)
         self.clients = ClientsResource(self._http)
         self.utils = UtilsResource(self._http)
+        self.agency = AgencyResource(self._http)
+        self.custom_guides = CustomGuidesResource(self._http)
+        self.canvas_editor = CanvasEditorResource(self._http)
 
     def set_api_key(self, api_key: str) -> None:
         """

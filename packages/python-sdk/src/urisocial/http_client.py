@@ -25,6 +25,7 @@ class HTTPClient:
         base_url: str = "https://api.urisocial.com",
         timeout: int = 60,
         workspace_id: Optional[str] = None,
+        end_user_id: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
     ):
@@ -32,6 +33,7 @@ class HTTPClient:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.workspace_id = workspace_id
+        self.end_user_id = end_user_id
         self.max_retries = max_retries
         self.retry_delay = retry_delay
 
@@ -43,11 +45,14 @@ class HTTPClient:
         headers = {
             "Content-Type": "application/json",
             "X-API-Key": self.api_key,
-            "User-Agent": "urisocial-python-sdk/2.0.0",
+            "User-Agent": "urisocial-python-sdk/3.0.0",
         }
 
         if self.workspace_id:
             headers["X-Workspace-ID"] = self.workspace_id
+
+        if self.end_user_id:
+            headers["X-End-User-ID"] = self.end_user_id
 
         self.session.headers.update(headers)
 
@@ -215,6 +220,15 @@ class HTTPClient:
     def get_workspace_id(self) -> Optional[str]:
         """Get current workspace ID"""
         return self.workspace_id
+
+    def set_end_user_id(self, end_user_id: Optional[str]) -> None:
+        """Set end-user ID for multi-tenant mode"""
+        self.end_user_id = end_user_id
+        self._update_headers()
+
+    def get_end_user_id(self) -> Optional[str]:
+        """Get current end-user ID"""
+        return self.end_user_id
 
     def close(self) -> None:
         """Close the session"""
