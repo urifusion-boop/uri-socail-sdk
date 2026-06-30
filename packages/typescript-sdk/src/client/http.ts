@@ -17,11 +17,13 @@ export class HTTPClient {
   private client: AxiosInstance;
   private apiKey: string;
   private defaultWorkspaceId?: string;
+  private defaultEndUserId?: string;
   private retryConfig: RetryConfig;
 
   constructor(config: URISocialConfig) {
     this.apiKey = config.apiKey;
     this.defaultWorkspaceId = config.workspaceId;
+    this.defaultEndUserId = config.endUserId;
     this.retryConfig = { ...defaultRetryConfig, ...config.retryConfig };
 
     this.client = axios.create({
@@ -29,7 +31,7 @@ export class HTTPClient {
       timeout: config.timeout || 60000,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': `urisocial-sdk-typescript/${this.getSDKVersion()}`,
+        'User-Agent': `urisocial-sdk-typescript/3.0.0`,
       },
     });
 
@@ -42,6 +44,11 @@ export class HTTPClient {
       // Add workspace context if available
       if (this.defaultWorkspaceId) {
         config.headers['X-Workspace-ID'] = this.defaultWorkspaceId;
+      }
+
+      // Add end-user context if available (multi-tenant mode)
+      if (this.defaultEndUserId) {
+        config.headers['X-End-User-ID'] = this.defaultEndUserId;
       }
 
       return config;
@@ -182,6 +189,22 @@ export class HTTPClient {
    */
   getWorkspaceId(): string | undefined {
     return this.defaultWorkspaceId;
+  }
+
+  /**
+   * Set default end-user ID for all requests (multi-tenant mode)
+   * @since 3.0.0 - Multi-tenant end-user support
+   */
+  setEndUserId(endUserId: string | undefined): void {
+    this.defaultEndUserId = endUserId;
+  }
+
+  /**
+   * Get current default end-user ID
+   * @since 3.0.0 - Multi-tenant end-user support
+   */
+  getEndUserId(): string | undefined {
+    return this.defaultEndUserId;
   }
 
   /**

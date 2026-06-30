@@ -14,6 +14,9 @@ import { VideoResource } from './resources/video';
 import { BlogResource } from './resources/blog';
 import { AutoGenerateResource } from './resources/auto-generate';
 import { UtilsResource } from './resources/utils';
+import { AgencyResource } from './resources/agency';
+import { CustomGuidesResource } from './resources/custom-guides';
+import { CanvasEditorResource } from './resources/canvas-editor';
 import { URISocialConfig } from './types';
 
 export * from './types';
@@ -27,7 +30,7 @@ export type { UsageInfo, UsageHistory } from './resources/billing';
  * ```typescript
  * import { URISocial } from '@urisocial/sdk';
  *
- * // Simple usage (single-tenant or using API key's default workspace)
+ * // Simple usage (single-tenant)
  * const client = new URISocial({ apiKey: 'your-api-key' });
  *
  * const content = await client.content.generate({
@@ -36,15 +39,19 @@ export type { UsageInfo, UsageHistory } from './resources/billing';
  *   referenceImage: 'https://example.com/product.jpg'
  * });
  *
- * // Multi-tenant usage with workspace context
+ * // Multi-tenant SaaS usage with end-users
  * const client = new URISocial({
  *   apiKey: 'your-api-key',
- *   workspaceId: 'wsp_abc123'  // All operations use this workspace
+ *   endUserId: 'user-123'  // Your user's ID from your system
  * });
  *
- * // Switch workspaces dynamically
- * client.workspaces.switch('wsp_xyz789');
- * await client.content.generate({ ... }); // Uses wsp_xyz789
+ * // Each end-user gets isolated brand profiles
+ * await client.brandProfile.update({ brandName: 'User's Brand' });
+ * await client.content.generate({ ... }); // Uses user-123's profile
+ *
+ * // Switch end-users dynamically
+ * client.setEndUserId('user-456');
+ * await client.content.generate({ ... }); // Now uses user-456's profile
  * ```
  */
 export class URISocial {
@@ -87,6 +94,24 @@ export class URISocial {
    */
   public readonly clients: ClientsResource;
 
+  /**
+   * Agency resource - Multi-brand agency management
+   * @since 3.0.0
+   */
+  public readonly agency: AgencyResource;
+
+  /**
+   * Custom Guides resource - Visual guide management
+   * @since 3.0.0
+   */
+  public readonly customGuides: CustomGuidesResource;
+
+  /**
+   * Canvas Editor resource - Layered document editing
+   * @since 3.0.0
+   */
+  public readonly canvasEditor: CanvasEditorResource;
+
   constructor(config: URISocialConfig) {
     if (!config.apiKey) {
       throw new Error('API key is required. Get yours at https://urisocial.com/dashboard/api-keys');
@@ -122,6 +147,11 @@ export class URISocial {
     // Initialize multi-tenant resources (v2.0.0)
     this.workspaces = new WorkspacesResource(this.http);
     this.clients = new ClientsResource(this.http);
+
+    // Initialize agency & advanced resources (v3.0.0)
+    this.agency = new AgencyResource(this.http);
+    this.customGuides = new CustomGuidesResource(this.http);
+    this.canvasEditor = new CanvasEditorResource(this.http);
   }
 
   /**
@@ -155,6 +185,40 @@ export class URISocial {
    */
   getWorkspaceId(): string | undefined {
     return this.http.getWorkspaceId();
+  }
+
+  /**
+   * Set end-user ID for multi-tenant SaaS applications
+   *
+   * Use this to isolate brand profiles per end-user when building
+   * a SaaS platform on top of URISocial.
+   *
+   * @param endUserId - Your user's ID from your system, or undefined to disable
+   * @since 3.0.0 - Multi-tenant end-user support
+   *
+   * @example
+   * ```typescript
+   * // Set end-user context
+   * client.setEndUserId('user-123');
+   * await client.brandProfile.update({ brandName: 'User 123 Brand' });
+   *
+   * // Switch to another end-user
+   * client.setEndUserId('user-456');
+   * await client.content.generate({ ... }); // Uses user-456's profile
+   * ```
+   */
+  setEndUserId(endUserId: string | undefined): void {
+    this.http.setEndUserId(endUserId);
+  }
+
+  /**
+   * Get current end-user ID
+   *
+   * @returns Current end-user ID or undefined
+   * @since 3.0.0 - Multi-tenant end-user support
+   */
+  getEndUserId(): string | undefined {
+    return this.http.getEndUserId();
   }
 }
 

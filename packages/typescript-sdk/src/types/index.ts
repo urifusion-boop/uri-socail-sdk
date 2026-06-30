@@ -15,6 +15,12 @@ export interface URISocialConfig {
    */
   workspaceId?: string;
   /**
+   * End-user ID for multi-tenant SaaS applications
+   * Use this to isolate brand profiles per end-user
+   * @since 3.0.0 - Multi-tenant end-user support
+   */
+  endUserId?: string;
+  /**
    * Retry configuration for failed requests
    * @default { maxRetries: 3, retryDelay: 1000, retryableStatusCodes: [408, 429, 500, 502, 503, 504], retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN'] }
    */
