@@ -1,6 +1,6 @@
 {
   "name": "@urisocial/react",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "React components and hooks for URI Social SDK - Enterprise-grade social media content generation and management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -38,14 +38,14 @@
   "author": "URI Social <support@urisocial.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@urisocial/sdk": "^2.0.0",
+    "@urisocial/sdk": "^3.0.1",
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "@urisocial/sdk": "^2.0.1",
+    "@urisocial/sdk": "^3.0.1",
     "eslint": "^8.56.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

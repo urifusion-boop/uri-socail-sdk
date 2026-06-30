@@ -4,7 +4,6 @@ import { DraftsResource } from './resources/drafts';
 import { ImagesResource } from './resources/images';
 import { ConnectionsResource } from './resources/connections';
 import { PublishingResource } from './resources/publishing';
-import { BillingResource } from './resources/billing';
 import { WorkspacesResource } from './resources/workspaces';
 import { ClientsResource } from './resources/clients';
 import { BrandProfileResource } from './resources/brand-profile';
@@ -21,7 +20,6 @@ import { URISocialConfig } from './types';
 
 export * from './types';
 export * from './types/errors';
-export type { UsageInfo, UsageHistory } from './resources/billing';
 
 /**
  * URI Social SDK Client
@@ -63,7 +61,6 @@ export class URISocial {
   public readonly images: ImagesResource;
   public readonly connections: ConnectionsResource;
   public readonly publishing: PublishingResource;
-  public readonly billing: BillingResource;
 
   // Brand & Profile
   public readonly brandProfile: BrandProfileResource;
@@ -125,7 +122,6 @@ export class URISocial {
     this.images = new ImagesResource(this.http);
     this.connections = new ConnectionsResource(this.http);
     this.publishing = new PublishingResource(this.http);
-    this.billing = new BillingResource(this.http);
 
     // Initialize brand & profile resources
     this.brandProfile = new BrandProfileResource(this.http);

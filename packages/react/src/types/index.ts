@@ -52,10 +52,6 @@ export interface PublishingPanelProps extends BaseComponentProps {
   onPublishError?: (error: Error) => void;
 }
 
-export interface CreditBadgeProps extends BaseComponentProps {
-  showUpgradeLink?: boolean;
-  onUpgradeClick?: () => void;
-}
 
 export interface ImageUploadProps extends BaseComponentProps {
   accept?: string;

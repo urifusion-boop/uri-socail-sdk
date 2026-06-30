@@ -5,7 +5,6 @@ from .drafts import DraftsResource
 from .images import ImagesResource
 from .connections import ConnectionsResource
 from .publishing import PublishingResource
-from .billing import BillingResource
 from .video import VideoResource
 from .blog import BlogResource
 from .auto_generate import AutoGenerateResource
@@ -15,6 +14,9 @@ from .calendar import CalendarResource
 from .workspaces import WorkspacesResource
 from .clients import ClientsResource
 from .utils import UtilsResource
+from .agency import AgencyResource
+from .custom_guides import CustomGuidesResource
+from .canvas_editor import CanvasEditorResource
 
 __all__ = [
     "ContentResource",
@@ -22,7 +24,6 @@ __all__ = [
     "ImagesResource",
     "ConnectionsResource",
     "PublishingResource",
-    "BillingResource",
     "VideoResource",
     "BlogResource",
     "AutoGenerateResource",
@@ -32,4 +33,7 @@ __all__ = [
     "WorkspacesResource",
     "ClientsResource",
     "UtilsResource",
+    "AgencyResource",
+    "CustomGuidesResource",
+    "CanvasEditorResource",
 ]

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "urisocial"
-version = "2.0.0"
+version = "3.0.0"
 description = "Official Python SDK for URI Social API - Enterprise-grade social media content generation and management"
 readme = "README.md"
 requires-python = ">=3.8"

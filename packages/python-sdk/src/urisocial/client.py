@@ -87,7 +87,6 @@ class URISocial:
         self.images = ImagesResource(self._http)
         self.connections = ConnectionsResource(self._http)
         self.publishing = PublishingResource(self._http)
-        self.billing = BillingResource(self._http)
         self.video = VideoResource(self._http)
         self.blog = BlogResource(self._http)
         self.auto_generate = AutoGenerateResource(self._http)

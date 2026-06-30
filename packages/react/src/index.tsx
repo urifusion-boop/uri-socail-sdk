@@ -14,13 +14,11 @@ export { URISocialProvider, useURISocial } from './context/URISocialContext';
 export { useContentGeneration } from './hooks/useContentGeneration';
 export { useDrafts } from './hooks/useDrafts';
 export { useConnections } from './hooks/useConnections';
-export { useBilling } from './hooks/useBilling';
 
 // Components
 export { ContentGenerator } from './components/ContentGenerator';
 export { DraftManager } from './components/DraftManager';
 export { ConnectionManager } from './components/ConnectionManager';
-export { CreditBadge } from './components/CreditBadge';
 
 // Types
 export type {
@@ -29,7 +27,6 @@ export type {
   ContentGeneratorProps,
   DraftManagerProps,
   ConnectionManagerProps,
-  CreditBadgeProps,
 } from './types';
 
 // Re-export core SDK types for convenience
@@ -42,5 +39,4 @@ export type {
   ImageGenerationRequest,
   ImageGenerationResult,
   Connection,
-  BillingInfo,
 } from '@urisocial/sdk';

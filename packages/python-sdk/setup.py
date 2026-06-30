@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="urisocial",
-    version="2.0.0",
+    version="3.0.0",
     author="URI Social",
     author_email="support@urisocial.com",
     description="Official Python SDK for URI Social API - Enterprise-grade social media content generation and management",
