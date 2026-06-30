@@ -14,6 +14,12 @@ export interface URISocialProviderProps {
   baseUrl?: string;
   timeout?: number;
   workspaceId?: string;
+  /**
+   * End-user ID for multi-tenant SaaS applications.
+   * Use this to isolate brand profiles per end-user.
+   * @since 3.0.0 - Multi-tenant end-user support
+   */
+  endUserId?: string;
   children: ReactNode;
 }
 
@@ -25,9 +31,22 @@ export interface URISocialProviderProps {
  * ```tsx
  * import { URISocialProvider } from '@urisocial/react';
  *
+ * // Direct usage
  * function App() {
  *   return (
- *     <URISocialProvider apiKey="your-api-key" workspaceId="workspace-id">
+ *     <URISocialProvider apiKey="your-api-key">
+ *       <YourComponents />
+ *     </URISocialProvider>
+ *   );
+ * }
+ *
+ * // Multi-tenant SaaS usage
+ * function App({ currentUser }) {
+ *   return (
+ *     <URISocialProvider
+ *       apiKey="your-api-key"
+ *       endUserId={currentUser.id}
+ *     >
  *       <YourComponents />
  *     </URISocialProvider>
  *   );
@@ -39,6 +58,7 @@ export function URISocialProvider({
   baseUrl,
   timeout,
   workspaceId,
+  endUserId,
   children,
 }: URISocialProviderProps) {
   const client = useMemo(() => {
@@ -47,9 +67,10 @@ export function URISocialProvider({
       baseUrl,
       timeout,
       workspaceId,
+      endUserId,
     };
     return new URISocial(config);
-  }, [apiKey, baseUrl, timeout, workspaceId]);
+  }, [apiKey, baseUrl, timeout, workspaceId, endUserId]);
 
   const value = useMemo(
     () => ({

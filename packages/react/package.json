@@ -1,6 +1,6 @@
 {
   "name": "@urisocial/react",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "React components and hooks for URI Social SDK - Enterprise-grade social media content generation and management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
