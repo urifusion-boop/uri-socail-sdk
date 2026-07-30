@@ -23,6 +23,45 @@ export * from './types';
 export * from './types/errors';
 export type { CustomGuide } from './resources/custom-guides';
 export type { SdkEndUser, EndUserSetup, ListEndUsersResponse } from './resources/end-users';
+export type {
+  VideoBillingSummary,
+  VideoEditingPricing,
+  ProduceVideoRequest,
+  ProduceVideoResult,
+  ProductionJob,
+  StartProductionRenderRequest,
+  AdjustProductionRequest,
+  SubmagicProduceRequest,
+  SubmagicProduceResult,
+  VideoJobStatus,
+  ZapCapTemplate,
+  ZapCapBrollPlacement,
+  ZapCapProduceRequest,
+  ZapCapProduceResult,
+  ZapCapTranscriptWord,
+  ZapCapRerenderRequest,
+  ZapCapCustomBrollPlacement,
+  EditVideoRequest,
+  EditVideoJob,
+  PolishVideoRequest,
+  PolishStyle,
+  CaptionPreset,
+  PolishVideoJob,
+  ClipActionRequest,
+  ClipActionJob,
+  StoryboardRequest,
+  Storyboard,
+  Scene,
+  VideoFromStoryboardRequest,
+  StoryboardFramesRequest,
+  VideoGenerationJob,
+  StoryboardFrameJob,
+  GenerateVideoCaptionRequest,
+  SaveVideoDraftRequest,
+  VideoDraft,
+  PublishVideoDraftRequest,
+  VideoPublishJob,
+} from './resources/video';
 
 /**
  * URI Social SDK Client

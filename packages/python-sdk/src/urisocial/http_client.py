@@ -1,8 +1,9 @@
 """HTTP client for URI Social API"""
 
+import os
 import requests
 import time
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, List, Tuple, Union, BinaryIO
 from .exceptions import (
     URISocialError,
     AuthenticationError,
@@ -14,6 +15,23 @@ from .exceptions import (
     NetworkError,
     ServerError,
 )
+
+# A file to upload: a filesystem path, raw bytes, or an open binary file
+# object (anything with a .read() method, e.g. open(path, "rb")).
+UploadFile = Union[str, bytes, BinaryIO]
+
+
+def normalize_upload_file(file: UploadFile, default_filename: str = "upload") -> Tuple[str, bytes]:
+    """Normalize an UploadFile into a (filename, content_bytes) pair."""
+    if isinstance(file, (bytes, bytearray)):
+        return default_filename, bytes(file)
+    if isinstance(file, str):
+        with open(file, "rb") as f:
+            return os.path.basename(file), f.read()
+    # File-like object
+    filename = getattr(file, "name", None)
+    filename = os.path.basename(filename) if filename else default_filename
+    return filename, file.read()
 
 
 class HTTPClient:
@@ -46,7 +64,7 @@ class HTTPClient:
             "Content-Type": "application/json",
             "X-API-Key": self.api_key,
             # Keep in sync with __init__.py's __version__ on each release.
-            "User-Agent": "urisocial-python-sdk/3.1.2",
+            "User-Agent": "urisocial-python-sdk/3.2.0",
         }
 
         if self.workspace_id:
@@ -123,7 +141,7 @@ class HTTPClient:
         jitter = random.uniform(0, 1)
         return min(exponential_delay + jitter, 60)  # Max 60 seconds
 
-    def _request_with_retry(self, method: Callable, *args, **kwargs) -> Dict[str, Any]:
+    def _request_with_retry(self, method: Callable, *args, parse_json: bool = True, **kwargs) -> Any:
         """Execute request with automatic retry logic"""
         attempt = 0
 
@@ -134,7 +152,7 @@ class HTTPClient:
                 if not response.ok:
                     self._handle_error(response)
 
-                return response.json()
+                return response.json() if parse_json else response.content
 
             except requests.exceptions.RequestException as e:
                 if not self._should_retry(e, attempt):
@@ -165,6 +183,14 @@ class HTTPClient:
             self.session.get, url, params=params, timeout=self.timeout
         )
 
+    def get_binary(self, path: str, params: Optional[Dict[str, Any]] = None) -> bytes:
+        """Make GET request and return the raw response body (e.g. an
+        image), instead of parsing it as JSON."""
+        url = f"{self.base_url}{path}"
+        return self._request_with_retry(
+            self.session.get, url, params=params, timeout=self.timeout, parse_json=False
+        )
+
     def post(
         self,
         path: str,
@@ -175,6 +201,37 @@ class HTTPClient:
         url = f"{self.base_url}{path}"
         return self._request_with_retry(
             self.session.post, url, data=data, json=json, timeout=self.timeout
+        )
+
+    def post_multipart(
+        self,
+        path: str,
+        files: Optional[List[Tuple[str, Tuple[str, bytes]]]] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Make a form-encoded POST request (multipart/form-data if `files`
+        is non-empty, otherwise application/x-www-form-urlencoded) — for any
+        endpoint whose backend parameters are FastAPI `Form(...)`/`File(...)`
+        fields rather than a JSON body.
+
+        `files` is a list of (field_name, (filename, content_bytes)) pairs —
+        a list rather than a dict so multiple files can share the same
+        field name (e.g. ZapCap's custom_broll_clips). Build entries with
+        `normalize_upload_file()`.
+        """
+        url = f"{self.base_url}{path}"
+        # The session sets a default 'Content-Type: application/json' header.
+        # requests only fills in the correct multipart boundary when no
+        # Content-Type is already present on the request, so it must be
+        # explicitly cleared here — passing None as a header value tells
+        # requests to omit that header for this call only.
+        return self._request_with_retry(
+            self.session.post,
+            url,
+            files=files or [],
+            data=data,
+            headers={"Content-Type": None},
+            timeout=self.timeout,
         )
 
     def put(
