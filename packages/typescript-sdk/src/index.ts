@@ -20,6 +20,7 @@ import { URISocialConfig } from './types';
 
 export * from './types';
 export * from './types/errors';
+export type { CustomGuide } from './resources/custom-guides';
 
 /**
  * URI Social SDK Client
