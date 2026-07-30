@@ -17,6 +17,11 @@ class DraftsResource:
         """
         Get all drafts with pagination
 
+        Backed by /social-media/content-calendar, brand-scoped under
+        multi-tenant mode. The legacy /api/v1/drafts endpoint this used to
+        call only ever scoped by the developer's shared account, so every
+        end-user saw every other end-user's drafts.
+
         Args:
             page: Page number (default: 1)
             per_page: Items per page (default: 20)
@@ -24,10 +29,19 @@ class DraftsResource:
         Returns:
             Paginated list of drafts
         """
-        return self._http.get(
-            "/api/v1/drafts",
-            params={"page": page, "per_page": per_page},
+        skip = (page - 1) * per_page
+        response = self._http.get(
+            "/social-media/content-calendar",
+            params={"skip": skip, "limit": per_page},
         )
+        data = response["responseData"]
+        return {
+            "data": data["drafts"],
+            "total": data["total_count"],
+            "page": page,
+            "per_page": per_page,
+            "has_more": data["pagination"]["has_more"],
+        }
 
     def get(self, draft_id: str) -> Draft:
         """
@@ -39,7 +53,8 @@ class DraftsResource:
         Returns:
             Draft details
         """
-        return self._http.get(f"/api/v1/drafts/{draft_id}")
+        response = self._http.get(f"/social-media/drafts/{draft_id}")
+        return response["responseData"]
 
     def update(
         self,
@@ -64,7 +79,8 @@ class DraftsResource:
         if image_url is not None:
             updates["image_url"] = image_url
 
-        return self._http.patch(f"/api/v1/drafts/{draft_id}", json=updates)
+        response = self._http.patch(f"/social-media/drafts/{draft_id}", json=updates)
+        return response["responseData"]
 
     def delete(self, draft_id: str) -> dict:
         """
@@ -76,7 +92,7 @@ class DraftsResource:
         Returns:
             Success confirmation
         """
-        return self._http.delete(f"/api/v1/drafts/{draft_id}")
+        return self._http.delete(f"/social-media/drafts/{draft_id}")
 
     def create(
         self,
@@ -87,19 +103,12 @@ class DraftsResource:
         """
         Create a new draft manually
 
-        Args:
-            text_content: Platform-specific text content
-            image_url: Optional generated image URL
-            reference_image: Optional reference/product image URL
-
-        Returns:
-            Created draft
+        Not currently supported — no brand-scoped equivalent of the legacy
+        /api/v1/drafts create endpoint exists yet. That legacy endpoint is
+        not brand-isolated under multi-tenant mode, so it's intentionally
+        not called here. Use content.generate() to create drafts instead.
         """
-        return self._http.post(
-            "/api/v1/drafts",
-            json={
-                "text_content": text_content,
-                "image_url": image_url,
-                "reference_image": reference_image,
-            },
+        raise NotImplementedError(
+            "drafts.create() is not currently supported for SDK/multi-tenant use — "
+            "use content.generate() instead."
         )

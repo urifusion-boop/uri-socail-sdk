@@ -22,11 +22,30 @@ export class DraftsResource {
 
   /**
    * Get all drafts with pagination
+   *
+   * @remarks Backed by /social-media/content-calendar, brand-scoped under
+   * multi-tenant mode — the legacy /api/v1/drafts endpoint this used to call
+   * only ever scoped by the developer's shared account, so every end-user
+   * saw every other end-user's drafts.
    */
   async list(page: number = 1, perPage: number = 20): Promise<PaginatedResponse<Draft>> {
-    return this.http.get<PaginatedResponse<Draft>>(
-      `/api/v1/drafts?page=${page}&per_page=${perPage}`
-    );
+    const skip = (page - 1) * perPage;
+    const response = await this.http.get<{
+      responseData: {
+        drafts: Draft[];
+        total_count: number;
+        pagination: { skip: number; limit: number; has_more: boolean };
+      };
+    }>(`/social-media/content-calendar?skip=${skip}&limit=${perPage}`);
+
+    const { drafts, total_count, pagination } = response.responseData;
+    return {
+      data: drafts,
+      total: total_count,
+      page,
+      per_page: perPage,
+      has_more: pagination.has_more,
+    } as PaginatedResponse<Draft>;
   }
 
   /**
@@ -55,7 +74,11 @@ export class DraftsResource {
       image_url?: string;
     }
   ): Promise<Draft> {
-    return this.http.patch<Draft>(`/api/v1/drafts/${draftId}`, updates);
+    const response = await this.http.patch<{ responseData: Draft }>(
+      `/social-media/drafts/${draftId}`,
+      updates
+    );
+    return response.responseData;
   }
 
   /**
@@ -67,13 +90,20 @@ export class DraftsResource {
 
   /**
    * Create a new draft manually
+   *
+   * @remarks Not currently supported — no brand-scoped equivalent of the
+   * legacy /api/v1/drafts create endpoint exists yet. That legacy endpoint
+   * is not brand-isolated under multi-tenant mode, so it's intentionally
+   * not called here. Use content.generate() to create drafts instead.
    */
-  async create(draft: {
+  async create(_draft: {
     text_content: PlatformContent[];
     image_url?: string;
     reference_image?: string;
   }): Promise<Draft> {
-    return this.http.post<Draft>('/api/v1/drafts', draft);
+    throw new Error(
+      'drafts.create() is not currently supported for SDK/multi-tenant use — use content.generate() instead.'
+    );
   }
 
   /**
