@@ -8,7 +8,6 @@ from .resources import (
     ImagesResource,
     ConnectionsResource,
     PublishingResource,
-    BillingResource,
     VideoResource,
     BlogResource,
     AutoGenerateResource,

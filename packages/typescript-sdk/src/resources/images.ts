@@ -12,14 +12,21 @@ export class ImagesResource {
   }
 
   /**
-   * Edit an existing image
+   * @deprecated Not currently supported by the backend — there is no generic,
+   * URL-based image edit endpoint. For editing images already attached to a
+   * draft, regenerate the draft's image via the drafts/content workflow
+   * instead. This method throws immediately rather than making a network
+   * call that would 404.
    */
-  async edit(request: {
+  async edit(_request: {
     imageUrl: string;
     prompt: string;
     maskUrl?: string;
   }): Promise<ImageGenerationResult> {
-    return this.http.post<ImageGenerationResult>('/api/v1/images/edit', request);
+    throw new Error(
+      'images.edit() is not supported by the URI Social API — there is no generic ' +
+        'image edit endpoint. Regenerate the draft image instead.'
+    );
   }
 
   /**

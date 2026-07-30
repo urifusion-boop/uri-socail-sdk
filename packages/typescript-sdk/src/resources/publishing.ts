@@ -117,8 +117,9 @@ export class PublishingResource {
   /**
    * Cancel a scheduled post
    * @deprecated Use drafts.unschedule() instead
+   * @param draftId - ID of the scheduled draft to cancel
    */
-  async cancelScheduled(scheduledId: string): Promise<{ success: boolean }> {
-    return this.http.delete(`/api/v1/publish/scheduled/${scheduledId}`);
+  async cancelScheduled(draftId: string): Promise<{ success: boolean }> {
+    return this.http.post(`/social-media/drafts/${draftId}/unschedule`);
   }
 }

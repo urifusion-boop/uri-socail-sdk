@@ -58,12 +58,14 @@ export class ConnectionsResource {
   }
 
   /**
-   * Get OAuth URL to connect a platform (legacy method for single platform)
-   * @deprecated Use initiate() instead for better multi-platform support
+   * @deprecated Not functional — the backend returns a placeholder, non-working
+   * OAuth URL for this legacy endpoint. Use initiate() instead, which drives
+   * the real, working OAuth flow.
    */
-  async getConnectUrl(platform: Platform, redirectUrl?: string): Promise<{ auth_url: string }> {
-    const params = redirectUrl ? `?redirect_url=${encodeURIComponent(redirectUrl)}` : '';
-    return this.http.get<{ auth_url: string }>(`/api/v1/connections/${platform}/connect${params}`);
+  async getConnectUrl(_platform: Platform, _redirectUrl?: string): Promise<{ auth_url: string }> {
+    throw new Error(
+      'connections.getConnectUrl() is not functional — use connections.initiate() instead.'
+    );
   }
 
   /**
@@ -94,11 +96,11 @@ export class ConnectionsResource {
   }
 
   /**
-   * Check connection status for a platform (legacy)
-   * @deprecated Use list() instead
+   * @deprecated Not functional — this legacy endpoint does not exist on the
+   * backend. Use list() instead.
    */
-  async getStatus(platform: Platform): Promise<Connection> {
-    return this.http.get<Connection>(`/api/v1/connections/${platform}/status`);
+  async getStatus(_platform: Platform): Promise<Connection> {
+    throw new Error('connections.getStatus() is not functional — use connections.list() instead.');
   }
 
   // ============================================================================

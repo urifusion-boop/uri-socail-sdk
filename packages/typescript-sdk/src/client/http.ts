@@ -13,6 +13,20 @@ import {
 } from '../types/errors';
 import { defaultRetryConfig, calculateBackoffDelay, shouldRetry, RetryConfig } from './retry';
 
+// Keep in sync with package.json's version on each release.
+const SDK_VERSION = '3.1.2';
+
+// Browsers refuse to let JS override User-Agent — it's on the fetch/XHR
+// forbidden-header list — so setting it there just throws a console
+// warning on every request and never actually reaches the wire. Only
+// attempt it in non-browser environments (Node, React Native, etc.).
+// (No `dom` lib in this package's tsconfig, so reach `window` via
+// globalThis rather than referencing the identifier directly.)
+const isBrowser =
+  typeof globalThis !== 'undefined' &&
+  typeof (globalThis as any).window !== 'undefined' &&
+  typeof (globalThis as any).window.document !== 'undefined';
+
 export class HTTPClient {
   private client: AxiosInstance;
   private apiKey: string;
@@ -31,7 +45,7 @@ export class HTTPClient {
       timeout: config.timeout || 60000,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': `urisocial-sdk-typescript/3.0.0`,
+        ...(isBrowser ? {} : { 'User-Agent': `urisocial-sdk-typescript/${SDK_VERSION}` }),
       },
     });
 
@@ -61,11 +75,6 @@ export class HTTPClient {
         throw this.handleError(error);
       }
     );
-  }
-
-  private getSDKVersion(): string {
-    // This will be replaced during build process
-    return '1.0.0';
   }
 
   private handleError(error: AxiosError<any>): URISocialError {

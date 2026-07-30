@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useContentGeneration } from '../hooks/useContentGeneration';
-import { useBilling } from '../hooks/useBilling';
 import type { ContentGeneratorProps } from '../types';
 import type { Platform } from '@urisocial/sdk';
 
@@ -57,7 +56,6 @@ export function ContentGenerator({
   theme,
 }: ContentGeneratorProps) {
   const { generate, isGenerating, error } = useContentGeneration();
-  const { billingInfo } = useBilling();
 
   const [seedContent, setSeedContent] = useState(defaultSeedContent);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(platforms);
@@ -141,10 +139,6 @@ export function ContentGenerator({
       return;
     }
 
-    // Check credits
-    if (billingInfo && billingInfo.credits_remaining < 10) {
-      if (onCreditsLow) onCreditsLow(billingInfo.credits_remaining);
-    }
 
     try {
       if (onGenerating) onGenerating(0);
@@ -375,14 +369,6 @@ export function ContentGenerator({
       )}
 
       {/* Credits Display */}
-      {billingInfo && (
-        <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: themeStyles.borderRadius }}>
-          <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
-            Credits remaining: <strong style={{ color: '#374151' }}>{billingInfo.credits_remaining}</strong>
-          </p>
-        </div>
-      )}
-
       {/* Error Display */}
       {error && (
         <div

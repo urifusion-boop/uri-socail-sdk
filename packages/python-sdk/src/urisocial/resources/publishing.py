@@ -1,108 +1,142 @@
 """Publishing resource"""
 
-from typing import TYPE_CHECKING, List, Optional
-from ..types import Platform
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from ..http_client import HTTPClient
 
 
 class PublishingResource:
-    """Resource for publishing content to social media"""
+    """Resource for the content approval / scheduling / publishing workflow"""
 
     def __init__(self, http: "HTTPClient"):
         self._http = http
 
-    def publish(
+    def approve(
         self,
-        draft_id: str,
-        platforms: List[Platform],
+        draft_ids: List[str],
+        schedule_option: str = "save_draft",
+        scheduled_datetime: Optional[str] = None,
+        approval_notes: Optional[str] = None,
     ) -> dict:
         """
-        Publish a draft to social media platforms
+        Approve content drafts, optionally publishing or scheduling them.
 
         Args:
-            draft_id: ID of draft to publish
-            platforms: List of platforms to publish to
-
-        Returns:
-            Publishing results for each platform
+            draft_ids: IDs of drafts to approve
+            schedule_option: One of 'immediate', 'schedule', 'save_draft'
+            scheduled_datetime: ISO 8601 datetime string, required when schedule_option='schedule'
+            approval_notes: Optional notes to attach to the approval
 
         Example:
-            >>> result = client.publishing.publish(
-            ...     draft_id='draft-123',
-            ...     platforms=['instagram', 'facebook']
+            >>> result = client.publishing.approve(
+            ...     draft_ids=['draft-123'],
+            ...     schedule_option='immediate',
             ... )
-            >>> for r in result['results']:
-            ...     print(f"{r['platform']}: {r['status']}")
+        """
+        body: Dict[str, Any] = {
+            "draft_ids": draft_ids,
+            "schedule_option": schedule_option,
+        }
+        if scheduled_datetime is not None:
+            body["scheduled_datetime"] = scheduled_datetime
+        if approval_notes is not None:
+            body["approval_notes"] = approval_notes
+        return self._http.post("/social-media/approve", json=body)
+
+    def deny(
+        self,
+        draft_ids: List[str],
+        denial_reason: str,
+        request_regeneration: bool = False,
+    ) -> dict:
+        """
+        Deny/reject drafts in the approval workflow.
+
+        Args:
+            draft_ids: IDs of drafts to deny
+            denial_reason: Reason for denial
+            request_regeneration: Whether to trigger regeneration of the denied drafts
         """
         return self._http.post(
-            "/api/v1/publish",
+            "/social-media/deny",
             json={
-                "draft_id": draft_id,
-                "platforms": platforms,
+                "draft_ids": draft_ids,
+                "denial_reason": denial_reason,
+                "request_regeneration": request_regeneration,
             },
+        )
+
+    def refine(self, draft_id: str, refinements: Dict[str, Any]) -> dict:
+        """
+        Request refinements to a draft.
+
+        Args:
+            draft_id: ID of the draft to refine
+            refinements: Specific changes to make
+        """
+        return self._http.put(
+            "/social-media/refine",
+            json={"draft_id": draft_id, "refinements": refinements},
         )
 
     def schedule(
         self,
-        draft_id: str,
-        platforms: List[Platform],
-        schedule_time: str,
+        draft_ids: List[str],
+        scheduled_datetime: str,
+        timezone: str = "UTC",
     ) -> dict:
         """
-        Schedule a draft for future publishing
+        Schedule drafts for future publishing.
 
         Args:
-            draft_id: ID of draft to schedule
-            platforms: List of platforms to publish to
-            schedule_time: ISO 8601 datetime string for publishing
-
-        Returns:
-            Scheduled post details
+            draft_ids: IDs of drafts to schedule
+            scheduled_datetime: ISO 8601 datetime string for publishing
+            timezone: IANA timezone name (default 'UTC')
 
         Example:
             >>> result = client.publishing.schedule(
-            ...     draft_id='draft-123',
-            ...     platforms=['instagram'],
-            ...     schedule_time='2024-12-25T10:00:00Z'
+            ...     draft_ids=['draft-123'],
+            ...     scheduled_datetime='2026-12-25T10:00:00Z',
             ... )
-            >>> print(result['scheduled_id'])
         """
         return self._http.post(
-            "/api/v1/publish/schedule",
+            "/social-media/schedule",
             json={
-                "draft_id": draft_id,
-                "platforms": platforms,
-                "schedule_time": schedule_time,
+                "draft_ids": draft_ids,
+                "scheduled_datetime": scheduled_datetime,
+                "timezone": timezone,
             },
         )
 
     def list_scheduled(self) -> dict:
         """
-        Get scheduled posts
-
-        Returns:
-            List of scheduled posts
+        Get scheduled posts.
 
         Example:
             >>> scheduled = client.publishing.list_scheduled()
-            >>> for post in scheduled['scheduled_posts']:
-            ...     print(f"{post['id']}: {post['scheduled_for']}")
         """
-        return self._http.get("/api/v1/publish/scheduled")
+        return self._http.get("/social-media/scheduled")
 
-    def cancel_scheduled(self, scheduled_id: str) -> dict:
+    def publish_scheduled(self, draft_ids: List[str]) -> dict:
         """
-        Cancel a scheduled post
+        Manually trigger publishing of already-scheduled drafts.
 
         Args:
-            scheduled_id: ID of scheduled post to cancel
+            draft_ids: IDs of scheduled drafts to publish immediately
+        """
+        return self._http.post(
+            "/social-media/publish-scheduled", json={"draft_ids": draft_ids}
+        )
 
-        Returns:
-            Success confirmation
+    def cancel_scheduled(self, draft_id: str) -> dict:
+        """
+        Cancel a scheduled post.
+
+        Args:
+            draft_id: ID of the scheduled draft to cancel
 
         Example:
-            >>> client.publishing.cancel_scheduled('scheduled-123')
+            >>> client.publishing.cancel_scheduled('draft-123')
         """
-        return self._http.delete(f"/api/v1/publish/scheduled/{scheduled_id}")
+        return self._http.post(f"/social-media/drafts/{draft_id}/unschedule")

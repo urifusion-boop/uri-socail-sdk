@@ -15,6 +15,13 @@ export interface ExtendedContentGenerationRequest extends ContentGenerationReque
   post_type?: 'feed' | 'carousel' | 'story';
   num_slides?: number; // For carousel posts
   acknowledged_incomplete_profile?: boolean;
+  /** Multiple reference images — supersedes referenceImage, still sent for backward compat if this is omitted. */
+  referenceImages?: string[];
+  /** Carousel only: per-slide index into referenceImages (or null for no image). Cycles automatically if omitted. */
+  slideImageMap?: (number | null)[];
+  /** One-time visual style slug(s) for this generation only — bypasses any selected Custom Visual Guide. Carousel cycles per slide; single post uses the first slug. */
+  styleOverride?: string[];
+  overrideCta?: string;
 }
 
 export class ContentResource {
@@ -28,6 +35,8 @@ export class ContentResource {
       seed_content: request.seedContent,
       platforms: request.platforms,
       reference_image: request.referenceImage,
+      reference_images: request.referenceImages,
+      slide_image_map: request.slideImageMap,
       seed_type: request.seed_type || 'text',
       include_images: request.include_images || false,
       image_model: request.image_model,
@@ -35,6 +44,8 @@ export class ContentResource {
       post_type: request.post_type || 'feed',
       num_slides: request.num_slides || 3,
       acknowledged_incomplete_profile: request.acknowledged_incomplete_profile || false,
+      style_override: request.styleOverride,
+      override_cta: request.overrideCta,
     });
   }
 

@@ -45,7 +45,8 @@ class HTTPClient:
         headers = {
             "Content-Type": "application/json",
             "X-API-Key": self.api_key,
-            "User-Agent": "urisocial-python-sdk/3.0.0",
+            # Keep in sync with __init__.py's __version__ on each release.
+            "User-Agent": "urisocial-python-sdk/3.1.0",
         }
 
         if self.workspace_id:

@@ -55,7 +55,7 @@ class WorkspacesResource:
         """Update member role"""
         return self._http.patch(
             f"/social-media/workspaces/{workspace_id}/members/{user_id}/role",
-            json={"role": role},
+            json={"new_role": role},
         )
 
     def remove_member(self, workspace_id: str, user_id: str) -> Dict[str, Any]:

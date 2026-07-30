@@ -62,12 +62,14 @@ export class ClientsResource {
   /**
    * Add credits to client
    *
-   * Note: This may require special permissions
+   * Note: Only the client owner may add credits.
    *
    * @param clientId - Client ID
-   * @param credits - Number of credits to add
+   * @param credits - Number of credits to add (1-1,000,000)
    */
   async addCredits(clientId: string, credits: number): Promise<void> {
-    await this.http.post(`/social-media/clients/${clientId}/credits/add`, { credits });
+    await this.http.post(
+      `/social-media/clients/${clientId}/credits/add?amount=${credits}`
+    );
   }
 }

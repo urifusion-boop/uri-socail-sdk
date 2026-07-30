@@ -68,6 +68,10 @@ export interface BrandProfile {
   // Visual style
   style_selections?: string[];
   style_prompt_fragments?: string[];
+  /** Custom Visual Guide V1 ids selected for this brand — generation rotates through these automatically when set (see customGuides resource). */
+  selected_custom_guides?: string[];
+  /** Custom Visual Guide V2 ids selected for this brand — same rotation behavior as V1, richer style extraction. */
+  selected_custom_guides_v2?: string[];
 
   // Typography
   font_style?: string;

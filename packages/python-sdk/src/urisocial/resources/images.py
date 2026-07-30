@@ -43,23 +43,15 @@ class ImagesResource:
         mask_url: Optional[str] = None,
     ) -> ImageGenerationResult:
         """
-        Edit an existing image
-
-        Args:
-            image_url: URL of image to edit
-            prompt: Edit instruction prompt
-            mask_url: Optional mask image URL for targeted edits
-
-        Returns:
-            Edited image URL
+        DEPRECATED: Not currently supported by the backend — there is no
+        generic, URL-based image edit endpoint. For editing images already
+        attached to a draft, regenerate the draft's image via the
+        drafts/content workflow instead. Raises immediately rather than
+        making a network call that would 404.
         """
-        return self._http.post(
-            "/api/v1/images/edit",
-            json={
-                "image_url": image_url,
-                "prompt": prompt,
-                "mask_url": mask_url,
-            },
+        raise NotImplementedError(
+            "images.edit() is not supported by the URI Social API — there is no "
+            "generic image edit endpoint. Regenerate the draft image instead."
         )
 
     def remove_background(self, image_url: str) -> dict:
