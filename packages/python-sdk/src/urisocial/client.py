@@ -20,6 +20,7 @@ from .resources import (
     AgencyResource,
     CustomGuidesResource,
     CanvasEditorResource,
+    EndUsersResource,
 )
 
 
@@ -98,6 +99,7 @@ class URISocial:
         self.agency = AgencyResource(self._http)
         self.custom_guides = CustomGuidesResource(self._http)
         self.canvas_editor = CanvasEditorResource(self._http)
+        self.end_users = EndUsersResource(self._http)
 
     def set_api_key(self, api_key: str) -> None:
         """

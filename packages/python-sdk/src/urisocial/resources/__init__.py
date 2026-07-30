@@ -17,6 +17,7 @@ from .utils import UtilsResource
 from .agency import AgencyResource
 from .custom_guides import CustomGuidesResource
 from .canvas_editor import CanvasEditorResource
+from .end_users import EndUsersResource
 
 __all__ = [
     "ContentResource",
@@ -36,4 +37,5 @@ __all__ = [
     "AgencyResource",
     "CustomGuidesResource",
     "CanvasEditorResource",
+    "EndUsersResource",
 ]

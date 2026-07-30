@@ -16,11 +16,13 @@ import { UtilsResource } from './resources/utils';
 import { AgencyResource } from './resources/agency';
 import { CustomGuidesResource } from './resources/custom-guides';
 import { CanvasEditorResource } from './resources/canvas-editor';
+import { EndUsersResource } from './resources/end-users';
 import { URISocialConfig } from './types';
 
 export * from './types';
 export * from './types/errors';
 export type { CustomGuide } from './resources/custom-guides';
+export type { SdkEndUser, EndUserSetup, ListEndUsersResponse } from './resources/end-users';
 
 /**
  * URI Social SDK Client
@@ -105,6 +107,12 @@ export class URISocial {
   public readonly customGuides: CustomGuidesResource;
 
   /**
+   * SDK client admin — list the end-users provisioned under your API key
+   * @since 3.1.5
+   */
+  public readonly endUsers: EndUsersResource;
+
+  /**
    * Canvas Editor resource - Layered document editing
    * @since 3.0.0
    */
@@ -149,6 +157,7 @@ export class URISocial {
     this.agency = new AgencyResource(this.http);
     this.customGuides = new CustomGuidesResource(this.http);
     this.canvasEditor = new CanvasEditorResource(this.http);
+    this.endUsers = new EndUsersResource(this.http);
   }
 
   /**
