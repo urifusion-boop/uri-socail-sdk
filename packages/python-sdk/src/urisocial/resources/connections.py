@@ -1,7 +1,7 @@
 """Social media connections resource"""
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from ..types import Connection, Platform
+from ..types import Platform
 
 if TYPE_CHECKING:
     from ..http_client import HTTPClient
@@ -15,17 +15,19 @@ class ConnectionsResource:
 
     def list(self) -> dict:
         """
-        Get all connected social media accounts
+        Get all connected social media accounts for the current user/end-user.
 
         Returns:
-            Dictionary with connected_platforms list
+            {"user_id", "connected_platforms": [...], "connections": {...},
+             "total_connections"}
 
         Example:
             >>> connections = client.connections.list()
             >>> for conn in connections['connected_platforms']:
             ...     print(f"{conn['platform']}: {conn['account_name']}")
         """
-        return self._http.get("/social-media/connections")
+        response = self._http.get("/social-media/connections")
+        return response["responseData"]
 
     def initiate(
         self,
@@ -33,14 +35,23 @@ class ConnectionsResource:
         source: Optional[str] = None,
     ) -> dict:
         """
-        Initiate the OAuth connection flow for one or more platforms.
+        Initiate the OAuth connection flow for one or more platforms via
+        Outstand. Open response['auth_urls'][platform] in the browser for
+        the user to authorise — after that, Outstand redirects to the
+        callback URL, then call get_pending() and finalize() to complete
+        the connection.
+
+        A platform can fail independently of the others — check
+        unsupported_platforms/failed_platforms if a requested platform's
+        URL is missing from auth_urls.
 
         Args:
             platforms: Platforms to connect (instagram, facebook, etc.)
             source: Optional flow context, e.g. 'onboarding' or 'settings'
 
         Returns:
-            Dictionary with session_token, auth_urls, and expires_at
+            {"user_id", "auth_urls", "platforms", "unsupported_platforms",
+             "failed_platforms", "instructions"}
 
         Example:
             >>> result = client.connections.initiate(['instagram', 'facebook'])
@@ -49,32 +60,43 @@ class ConnectionsResource:
         body: Dict[str, Any] = {"platforms": platforms}
         if source is not None:
             body["source"] = source
-        return self._http.post("/social-media/connect/initiate", json=body)
+        response = self._http.post("/social-media/connect/initiate", json=body)
+        return response["responseData"]
 
     def get_pending(self, session_token: str) -> dict:
         """
-        Get pending connection status for a session started by initiate().
+        After the user completes the Outstand OAuth redirect, retrieve the
+        pages/accounts available for them to choose from before finalizing.
 
         Args:
-            session_token: Session token returned by initiate()
+            session_token: Extracted from the auth_url returned by initiate()
+
+        Returns:
+            {"session_token", "network", "expires_at", "available_pages"}
         """
-        return self._http.get(f"/social-media/connect/pending/{session_token}")
+        response = self._http.get(f"/social-media/connect/pending/{session_token}")
+        return response["responseData"]
 
     def finalize(self, session_token: str, selected_page_ids: List[str]) -> dict:
         """
-        Finalize a connection after the user completes the OAuth callback.
+        Finalize a connection after the user completes the OAuth callback —
+        selects which page(s)/account(s) to keep connected.
 
         Args:
             session_token: Session token returned by initiate()
             selected_page_ids: IDs of the pages/accounts the user selected
+
+        Returns:
+            {"user_id", "accounts_connected", "total", "connected_at"}
         """
-        return self._http.post(
+        response = self._http.post(
             "/social-media/connect/finalize",
             json={
                 "session_token": session_token,
                 "selected_page_ids": selected_page_ids,
             },
         )
+        return response["responseData"]
 
     def get_connect_url(
         self,
@@ -93,26 +115,39 @@ class ConnectionsResource:
 
     def disconnect(self, account_id: str) -> dict:
         """
-        Disconnect a platform account.
+        Disconnect a platform account (Outstand-managed connections).
 
         Args:
-            account_id: Outstand account ID to disconnect (see Connection['id']
-                from list())
+            account_id: Outstand account ID to disconnect (from list()'s
+                connected_platforms[]['outstand_account_id'])
+
+        Returns:
+            {"outstand_account_id", "platform", "username", "status",
+             "disconnected_at"}
 
         Example:
             >>> client.connections.disconnect('acct_abc123')
         """
-        return self._http.delete(f"/social-media/connections/account/{account_id}")
+        response = self._http.delete(f"/social-media/connections/account/{account_id}")
+        return response["responseData"]
 
     def disconnect_instagram(self, ig_user_id: str) -> dict:
-        """Disconnect an Instagram Direct (Meta Business) connection."""
+        """Disconnect an Instagram Direct (Meta Business) connection.
+
+        Returns: {"status", "responseMessage"} — not envelope-wrapped like
+        the other methods on this resource, this endpoint returns a flat body.
+        """
         return self._http.delete(f"/social-media/connections/instagram-direct/{ig_user_id}")
 
     def disconnect_facebook(self) -> dict:
-        """Disconnect the Facebook Direct (Meta Business) connection."""
+        """Disconnect the Facebook Direct (Meta Business) connection.
+
+        Returns: {"status", "responseMessage"} — not envelope-wrapped like
+        the other methods on this resource, this endpoint returns a flat body.
+        """
         return self._http.delete("/social-media/connections/facebook-direct")
 
-    def get_status(self, platform: Platform) -> Connection:
+    def get_status(self, platform: Platform) -> dict:
         """
         DEPRECATED: Not functional — this legacy endpoint does not exist on
         the backend. Use list() instead.
@@ -123,48 +158,43 @@ class ConnectionsResource:
 
     # ------------------------------------------------------------------
     # Direct Platform Connections (Facebook & Instagram via Meta Business)
+    #
+    # KNOWN BROKEN — do not use yet. The backend's initiate endpoints return
+    # an HTTP redirect (a 302 to Facebook's OAuth page) meant for direct
+    # browser navigation, not a fetch/request call — calling these methods
+    # gets you Facebook's login page HTML, not a URL string. The finalize
+    # endpoints additionally expect a completely different request shape
+    # than what's implemented here (fb_page_id/ig_user_id selected from the
+    # callback's available pages, not an OAuth code) — the whole
+    # page-selection step this flow depends on isn't wired up on the SDK
+    # side at all yet. Use the generic initiate()/get_pending()/finalize()
+    # flow above instead, which is real and working.
     # ------------------------------------------------------------------
 
     def initiate_facebook_direct(self, redirect_uri: str) -> dict:
-        """Initiate the Facebook Direct (Meta Business) OAuth flow.
-
-        Args:
-            redirect_uri: Your application's callback URL
-        """
-        return self._http.get(
-            f"/social-media/connect/facebook-direct/initiate?redirect_uri={redirect_uri}"
+        """DEPRECATED: See the "KNOWN BROKEN" note above — not functional yet."""
+        raise NotImplementedError(
+            "connections.initiate_facebook_direct() is not functional yet — "
+            "use connections.initiate() instead."
         )
 
     def finalize_facebook_direct(self, code: str, redirect_uri: str) -> dict:
-        """Finalize a Facebook Direct connection after the OAuth callback.
-
-        Args:
-            code: OAuth authorization code from the callback
-            redirect_uri: Same redirect URI used in initiate_facebook_direct()
-        """
-        return self._http.post(
-            "/social-media/connect/facebook-direct/finalize",
-            json={"code": code, "redirect_uri": redirect_uri},
+        """DEPRECATED: See the "KNOWN BROKEN" note above — not functional yet."""
+        raise NotImplementedError(
+            "connections.finalize_facebook_direct() is not functional yet — "
+            "use connections.finalize() instead."
         )
 
     def initiate_instagram_direct(self, redirect_uri: str) -> dict:
-        """Initiate the Instagram Direct (Meta Business) OAuth flow.
-
-        Args:
-            redirect_uri: Your application's callback URL
-        """
-        return self._http.get(
-            f"/social-media/connect/instagram-direct/initiate?redirect_uri={redirect_uri}"
+        """DEPRECATED: See the "KNOWN BROKEN" note above — not functional yet."""
+        raise NotImplementedError(
+            "connections.initiate_instagram_direct() is not functional yet — "
+            "use connections.initiate() instead."
         )
 
     def finalize_instagram_direct(self, code: str, redirect_uri: str) -> dict:
-        """Finalize an Instagram Direct connection after the OAuth callback.
-
-        Args:
-            code: OAuth authorization code from the callback
-            redirect_uri: Same redirect URI used in initiate_instagram_direct()
-        """
-        return self._http.post(
-            "/social-media/connect/instagram-direct/finalize",
-            json={"code": code, "redirect_uri": redirect_uri},
+        """DEPRECATED: See the "KNOWN BROKEN" note above — not functional yet."""
+        raise NotImplementedError(
+            "connections.finalize_instagram_direct() is not functional yet — "
+            "use connections.finalize() instead."
         )
