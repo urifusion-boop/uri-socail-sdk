@@ -1,5 +1,6 @@
 """HTTP client for URI Social API"""
 
+import mimetypes
 import os
 import requests
 import time
@@ -21,17 +22,29 @@ from .exceptions import (
 UploadFile = Union[str, bytes, BinaryIO]
 
 
-def normalize_upload_file(file: UploadFile, default_filename: str = "upload") -> Tuple[str, bytes]:
-    """Normalize an UploadFile into a (filename, content_bytes) pair."""
+def normalize_upload_file(
+    file: UploadFile, default_filename: str = "upload"
+) -> Tuple[str, bytes, str]:
+    """Normalize an UploadFile into a (filename, content_bytes, content_type)
+    triple. requests only guesses a part's Content-Type from a 3-tuple —
+    a bare (filename, content) 2-tuple sends no Content-Type at all, which
+    backends that check file.content_type (e.g. FastAPI's UploadFile) see
+    as None and reject."""
     if isinstance(file, (bytes, bytearray)):
-        return default_filename, bytes(file)
-    if isinstance(file, str):
+        filename = default_filename
+        content: bytes = bytes(file)
+    elif isinstance(file, str):
+        filename = os.path.basename(file)
         with open(file, "rb") as f:
-            return os.path.basename(file), f.read()
-    # File-like object
-    filename = getattr(file, "name", None)
-    filename = os.path.basename(filename) if filename else default_filename
-    return filename, file.read()
+            content = f.read()
+    else:
+        # File-like object
+        name = getattr(file, "name", None)
+        filename = os.path.basename(name) if name else default_filename
+        content = file.read()
+
+    content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    return filename, content, content_type
 
 
 class HTTPClient:
@@ -64,7 +77,7 @@ class HTTPClient:
             "Content-Type": "application/json",
             "X-API-Key": self.api_key,
             # Keep in sync with __init__.py's __version__ on each release.
-            "User-Agent": "urisocial-python-sdk/3.2.1",
+            "User-Agent": "urisocial-python-sdk/3.2.2",
         }
 
         if self.workspace_id:
@@ -206,7 +219,7 @@ class HTTPClient:
     def post_multipart(
         self,
         path: str,
-        files: Optional[List[Tuple[str, Tuple[str, bytes]]]] = None,
+        files: Optional[List[Tuple[str, Tuple[str, bytes, str]]]] = None,
         data: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Make a form-encoded POST request (multipart/form-data if `files`
@@ -214,10 +227,10 @@ class HTTPClient:
         endpoint whose backend parameters are FastAPI `Form(...)`/`File(...)`
         fields rather than a JSON body.
 
-        `files` is a list of (field_name, (filename, content_bytes)) pairs —
-        a list rather than a dict so multiple files can share the same
-        field name (e.g. ZapCap's custom_broll_clips). Build entries with
-        `normalize_upload_file()`.
+        `files` is a list of (field_name, (filename, content_bytes,
+        content_type)) triples — a list rather than a dict so multiple
+        files can share the same field name (e.g. ZapCap's
+        custom_broll_clips). Build entries with `normalize_upload_file()`.
         """
         url = f"{self.base_url}{path}"
         # The session sets a default 'Content-Type: application/json' header.

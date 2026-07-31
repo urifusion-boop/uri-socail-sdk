@@ -1,6 +1,6 @@
 """Brand profile resource for URI Social SDK"""
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from ..http_client import HTTPClient, UploadFile, normalize_upload_file
 
 
@@ -18,36 +18,52 @@ class BrandProfileResource:
         """Update brand profile"""
         return self._http.post("/social-media/brand-profile", json=profile)
 
-    def upload_logo(self, logo_file: UploadFile, logo_position: Optional[str] = None) -> Dict[str, Any]:
-        """Upload brand logo.
+    def upload_logo(self, logo_file: UploadFile) -> Dict[str, Any]:
+        """Upload brand logo. To set where it's placed on generated images,
+        call update({"logo_position": ..., "logo_size": ...}) separately —
+        the upload endpoint itself doesn't accept a position (there's
+        nowhere on the backend for it to go; it's read from the profile at
+        generation time).
 
         Args:
             logo_file: A file path, raw bytes, or open binary file object.
-            logo_position: Where the logo is placed on generated images.
+
+        Returns:
+            {"logo_url": ...}
         """
-        filename, content = normalize_upload_file(logo_file, default_filename="logo.png")
-        data = {"logo_position": logo_position} if logo_position else None
-        return self._http.post_multipart(
+        filename, content, content_type = normalize_upload_file(logo_file, default_filename="logo.png")
+        response = self._http.post_multipart(
             "/social-media/brand-profile/logo",
-            files=[("logo_file", (filename, content))],
-            data=data,
+            files=[("file", (filename, content, content_type))],
         )
+        return response["responseData"]
 
     def upload_sample_template(self, template_file: UploadFile) -> Dict[str, Any]:
         """Upload a sample template image for style reference.
 
         Args:
             template_file: A file path, raw bytes, or open binary file object.
-        """
-        filename, content = normalize_upload_file(template_file, default_filename="template.png")
-        return self._http.post_multipart(
-            "/social-media/brand-profile/sample-template",
-            files=[("template_file", (filename, content))],
-        )
 
-    def analyze_voice_samples(self, voice_samples: List[str]) -> Dict[str, Any]:
-        """Analyze voice samples to derive brand voice"""
-        return self._http.post(
-            "/social-media/brand-profile/analyze-voice-samples",
-            json={"voice_samples": voice_samples},
+        Returns:
+            {"file_url": ...}
+        """
+        filename, content, content_type = normalize_upload_file(template_file, default_filename="template.png")
+        response = self._http.post_multipart(
+            "/social-media/brand-profile/sample-template",
+            files=[("file", (filename, content, content_type))],
         )
+        return response["responseData"]
+
+    def analyze_voice_samples(self, voice_samples: List[str], merge_with_profile: bool = True) -> Dict[str, Any]:
+        """Analyze up to 5 sample captions to derive brand voice. By default,
+        merges the result into the brand profile — pass
+        merge_with_profile=False to just preview the analysis without saving it.
+
+        Returns:
+            {"analysis": {...}, "updated_voice_profile": {...} (if merged), "merged": bool}
+        """
+        response = self._http.post(
+            "/social-media/brand-profile/analyze-voice-samples",
+            json={"sample_captions": voice_samples, "merge_with_profile": merge_with_profile},
+        )
+        return response["responseData"]

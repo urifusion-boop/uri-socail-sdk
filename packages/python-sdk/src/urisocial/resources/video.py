@@ -71,11 +71,11 @@ class VideoResource:
 
         files = []
         if video is not None:
-            filename, content = normalize_upload_file(video, default_filename="video.mp4")
-            files.append(("video", (filename, content)))
+            filename, content, content_type = normalize_upload_file(video, default_filename="video.mp4")
+            files.append(("video", (filename, content, content_type)))
         if custom_music is not None:
-            filename, content = normalize_upload_file(custom_music, default_filename="music.mp3")
-            files.append(("custom_music", (filename, content)))
+            m_filename, m_content, m_content_type = normalize_upload_file(custom_music, default_filename="music.mp3")
+            files.append(("custom_music", (m_filename, m_content, m_content_type)))
 
         data = {
             "video_type": video_type,
@@ -166,11 +166,11 @@ class VideoResource:
 
         Returns: {"job_id": ..., "billing": {...}}
         """
-        filename, content = normalize_upload_file(video, default_filename="video.mp4")
-        files = [("video", (filename, content))]
+        filename, content, content_type = normalize_upload_file(video, default_filename="video.mp4")
+        files = [("video", (filename, content, content_type))]
         if enable_music and custom_music is not None:
-            m_filename, m_content = normalize_upload_file(custom_music, default_filename="music.mp3")
-            files.append(("custom_music", (m_filename, m_content)))
+            m_filename, m_content, m_content_type = normalize_upload_file(custom_music, default_filename="music.mp3")
+            files.append(("custom_music", (m_filename, m_content, m_content_type)))
 
         data = {
             "template_name": template_name,
@@ -232,15 +232,15 @@ class VideoResource:
 
         files = []
         if video is not None:
-            filename, content = normalize_upload_file(video, default_filename="video.mp4")
-            files.append(("video", (filename, content)))
+            filename, content, content_type = normalize_upload_file(video, default_filename="video.mp4")
+            files.append(("video", (filename, content, content_type)))
         if enable_music and custom_music is not None:
-            m_filename, m_content = normalize_upload_file(custom_music, default_filename="music.mp3")
-            files.append(("custom_music", (m_filename, m_content)))
+            m_filename, m_content, m_content_type = normalize_upload_file(custom_music, default_filename="music.mp3")
+            files.append(("custom_music", (m_filename, m_content, m_content_type)))
         if custom_broll_clips:
             for i, clip in enumerate(custom_broll_clips):
-                c_filename, c_content = normalize_upload_file(clip, default_filename=f"broll-{i}.mp4")
-                files.append(("custom_broll_clips", (c_filename, c_content)))
+                c_filename, c_content, c_content_type = normalize_upload_file(clip, default_filename=f"broll-{i}.mp4")
+                files.append(("custom_broll_clips", (c_filename, c_content, c_content_type)))
 
         data = {
             "template_id": template_id,
@@ -316,8 +316,8 @@ class VideoResource:
         """
         files = []
         for i, clip in enumerate(clips):
-            filename, content = normalize_upload_file(clip, default_filename=f"broll-{i}.mp4")
-            files.append(("clips", (filename, content)))
+            filename, content, content_type = normalize_upload_file(clip, default_filename=f"broll-{i}.mp4")
+            files.append(("clips", (filename, content, content_type)))
 
         response = self._http.post_multipart(
             f"/social-media/zapcap-job/{job_id}/custom-broll",
@@ -337,10 +337,10 @@ class VideoResource:
         """Run the Level 1 FFmpeg editing pipeline on a raw upload — crop
         to 9:16, colour grade, trim, brand text overlays — and save the
         result as a reel draft. Poll get_edit_video_job() for status."""
-        filename, content = normalize_upload_file(video, default_filename="video.mp4")
+        filename, content, content_type = normalize_upload_file(video, default_filename="video.mp4")
         response = self._http.post_multipart(
             "/social-media/edit-video",
-            files=[("video", (filename, content))],
+            files=[("video", (filename, content, content_type))],
             data={
                 "platform": platform,
                 "enhancements": _json.dumps(enhancements) if enhancements else "{}",
@@ -374,10 +374,10 @@ class VideoResource:
     ) -> Dict[str, Any]:
         """Run the Video Polish clipping pipeline (ingest + quality check +
         Reap) on a raw upload. Poll get_polish_job() for status and clips."""
-        filename, content = normalize_upload_file(video, default_filename="video.mp4")
+        filename, content, content_type = normalize_upload_file(video, default_filename="video.mp4")
         response = self._http.post_multipart(
             "/social-media/polish-video",
-            files=[("video", (filename, content))],
+            files=[("video", (filename, content, content_type))],
             data={
                 "style_preset": style_preset,
                 "language": language,

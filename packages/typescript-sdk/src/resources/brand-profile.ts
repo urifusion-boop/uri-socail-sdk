@@ -12,6 +12,7 @@ export interface BrandProfile {
   // Identity
   logo_url?: string;
   logo_position?: 'top_left' | 'top_center' | 'top_right' | 'bottom_left' | 'bottom_center' | 'bottom_right' | 'center';
+  logo_size?: 'small' | 'medium' | 'large';
   brand_colors?: string[];
   sample_template_urls?: string[];
 
@@ -82,10 +83,27 @@ export interface UploadLogoResponse {
   logo_url: string;
 }
 
+export interface UploadSampleTemplateResponse {
+  file_url: string;
+}
+
 export interface VoiceAnalysisResponse {
-  derived_voice: string;
-  confidence_score?: number;
-  voice_characteristics?: string[];
+  analysis: Record<string, any>;
+  updated_voice_profile?: Record<string, any>;
+  merged: boolean;
+}
+
+/** Accepts either a raw base64 string or a data URL (data:image/png;base64,...). */
+function base64ToBlob(base64: string): Blob {
+  const match = base64.match(/^data:([^;]+);base64,(.*)$/);
+  const mimeType = match ? match[1] : 'application/octet-stream';
+  const data = match ? match[2] : base64;
+  const byteChars = atob(data);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) {
+    byteNumbers[i] = byteChars.charCodeAt(i);
+  }
+  return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
 }
 
 export class BrandProfileResource {
@@ -109,57 +127,56 @@ export class BrandProfileResource {
   }
 
   /**
-   * Upload brand logo
-   * @param file - Logo image file (base64 or File object)
-   * @param position - Logo position on generated images
+   * Upload brand logo. To set where it's placed on generated images, use
+   * update({ logo_position, logo_size }) as a separate call — the upload
+   * endpoint itself doesn't accept a position (there's nowhere on the
+   * backend for it to go; it's read from the profile at generation time).
+   * @param file - Logo image file (base64/data URL string, or a File object)
    */
-  async uploadLogo(file: string | File, position?: string): Promise<UploadLogoResponse> {
+  async uploadLogo(file: string | File): Promise<UploadLogoResponse> {
     const formData = new FormData();
+    const filePart = typeof file === 'string' ? base64ToBlob(file) : file;
+    formData.append('file', filePart, typeof file === 'string' ? 'logo.png' : file.name);
 
-    if (typeof file === 'string') {
-      // Base64 string
-      formData.append('logo_file', file);
-    } else {
-      // File object
-      formData.append('logo_file', file);
-    }
-
-    if (position) {
-      formData.append('logo_position', position);
-    }
-
-    return this.http.post<UploadLogoResponse>('/social-media/brand-profile/logo', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const response = await this.http.post<{ responseData: UploadLogoResponse }>(
+      '/social-media/brand-profile/logo',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.responseData;
   }
 
   /**
    * Upload sample template for style reference
-   * @param file - Template image file
+   * @param file - Template image file (base64/data URL string, or a File object)
    */
-  async uploadSampleTemplate(file: string | File): Promise<{ template_url: string }> {
+  async uploadSampleTemplate(file: string | File): Promise<UploadSampleTemplateResponse> {
     const formData = new FormData();
+    const filePart = typeof file === 'string' ? base64ToBlob(file) : file;
+    formData.append('file', filePart, typeof file === 'string' ? 'template.png' : file.name);
 
-    if (typeof file === 'string') {
-      formData.append('template_file', file);
-    } else {
-      formData.append('template_file', file);
-    }
-
-    return this.http.post<{ template_url: string }>(
+    const response = await this.http.post<{ responseData: UploadSampleTemplateResponse }>(
       '/social-media/brand-profile/sample-template',
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
+    return response.responseData;
   }
 
   /**
-   * Analyze voice samples to derive brand voice
-   * @param samples - Array of sample text content representing brand voice
+   * Analyze voice samples (max 5) to derive brand voice. By default, merges
+   * the result into the brand profile — pass mergeWithProfile: false to
+   * just preview the analysis without saving it.
+   * @param samples - Sample captions/text representing the brand's voice
    */
-  async analyzeVoiceSamples(samples: string[]): Promise<VoiceAnalysisResponse> {
-    return this.http.post<VoiceAnalysisResponse>('/social-media/brand-profile/analyze-voice-samples', {
-      voice_samples: samples,
-    });
+  async analyzeVoiceSamples(
+    samples: string[],
+    mergeWithProfile: boolean = true
+  ): Promise<VoiceAnalysisResponse> {
+    const response = await this.http.post<{ responseData: VoiceAnalysisResponse }>(
+      '/social-media/brand-profile/analyze-voice-samples',
+      { sample_captions: samples, merge_with_profile: mergeWithProfile }
+    );
+    return response.responseData;
   }
 }

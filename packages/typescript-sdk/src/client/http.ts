@@ -14,7 +14,7 @@ import {
 import { defaultRetryConfig, calculateBackoffDelay, shouldRetry, RetryConfig } from './retry';
 
 // Keep in sync with package.json's version on each release.
-const SDK_VERSION = '3.2.1';
+const SDK_VERSION = '3.2.2';
 
 // Browsers refuse to let JS override User-Agent — it's on the fetch/XHR
 // forbidden-header list — so setting it there just throws a console
